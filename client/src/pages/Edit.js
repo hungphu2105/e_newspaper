@@ -4,6 +4,7 @@ import { useState , useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { useParams } from 'react-router-dom';
 import { Trash  } from "lucide-react";
+import { getCookieByName } from "../utils/cookie";
 
 function Edit() {
     const [token, setToken] = useState([]);
@@ -42,13 +43,16 @@ function Edit() {
     };
 
     const handleSubmit = async () => {
+        if (!formData.title || !formData.summary || !formData.content) {
+            alert("Vui lòng điền đầy đủ thông tin và chọn ảnh trước khi đăng bài.");
+            return;
+        }
         try {
-            //console.log(formData)
             const response = await axios.put(`http://localhost:4000/blogs/${id}`, 
                 formData, 
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        Authorization: `Bearer ${getCookieByName('access_token')}`,
                         'Content-Type': 'multipart/form-data',
                     },
                 }
@@ -72,25 +76,6 @@ function Edit() {
             setFormData(formDataWithoutImage);
         }
     }, [formData.image]);
-
-    useEffect(() => {
-        const fetch = async () => {
-            try {
-                const cookies = document.cookie.split(';');
-                const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('access_token='));
-                if (tokenCookie) {
-                const token = tokenCookie.split('=')[1].trim();
-                setToken(token);
-                } else {
-                console.error('Access token not found in cookie.');
-                }
-            } catch (error) {
-                console.error('Error fetching token:', error);
-            }
-        };
-      
-        fetch();
-    }, []);
       
     useEffect(() => {
         const fetchData = async () => {
@@ -98,7 +83,7 @@ function Edit() {
                 //console.log(id);
                 const response = await axios.get(`http://localhost:4000/blogs/${id}`, {
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${getCookieByName('access_token')}`,
                 },
                 });
                 //setFormData(response.data.blog);
@@ -111,24 +96,21 @@ function Edit() {
             }
         };
       
-        if (token) {
-          fetchData();
-        }
-    }, [token]);
+        
+        fetchData();
+    }, []);
 
     const handleDelete = async () => {
         try {
-            //console.log(formData)
             const response = await axios.delete(`http://localhost:4000/me/myblogs/${id}`, 
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        Authorization: `Bearer ${getCookieByName('access_token')}`,
                         'Content-Type': 'multipart/form-data',
                     },
                 }
             );
             if(response.data.success){
-                //console.log(response.data.message)
                 alert(response.data.message)
                 navigate(`/me/myblogs`);
             }  
@@ -136,10 +118,6 @@ function Edit() {
                 console.log(response)
             } 
         } 
-        // catch (error) {
-        //     alert("Lỗi");
-        //     console.error('Lỗi', error);  
-        // }
         finally{
 
         }

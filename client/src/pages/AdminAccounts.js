@@ -4,56 +4,37 @@ import { useState , useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import moment from 'moment';
 import { Ban , CheckCircle2  } from 'lucide-react';
+import { getCookieByName } from "../utils/cookie";
 
 function AdminAccounts() {
     const [users, setUsers] = useState([]);
-    const [token, setToken] = useState([]);
 
     useEffect(() => {
-        const fetch = async () => {
-          try {
-            const cookies = document.cookie.split(';');
-            const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('access_token='));
-            const token = tokenCookie.split('=')[1].trim();
-            setToken(token);
-          } catch (error) {
+        
+      
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const response = await axios.get('http://localhost:4000/users/admin', {
+                headers: {
+                Authorization: `Bearer ${getCookieByName('access_token')}`,
+                },
+            });
+            setUsers(response.data.users);
+        } catch (error) {
             console.error('Error fetching data:', error);
-          }
-        };
-      
-        fetch();
-      }, []);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                console.log(token)
-                const response = await axios.get('http://localhost:4000/users/admin', {
-                    headers: {
-                    Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                setUsers(response.data.users);
-                //console.log(response.data.users)
-            } catch (error) {
-                console.error('Error fetching blog data:', error);
-            }
-        };
-      
-        if (token) {
-          fetchData();
         }
-    }, [token]);
+    };
 
     const handleDisable = async (userId) => {
         try {
-            console.log(token)
             const response = await axios.post(`http://localhost:4000/users/admin/${userId}`, 
                 {},
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        Authorization: `Bearer ${getCookieByName('access_token')}`,
                         'Content-Type': 'multipart/form-data',
                     },
                 }
@@ -61,7 +42,8 @@ function AdminAccounts() {
             if(response.data.success){
                 //console.log(response.data.message)
                 //alert(response.data.message)
-                window.location.reload();
+                //window.location.reload();
+                fetchData()
                 //navigate(`/me/myblogs`);
             }  
             // else{

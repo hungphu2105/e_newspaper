@@ -4,47 +4,38 @@ import { useState , useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import moment from 'moment';
 import { Eye } from 'lucide-react';
+import { getCookieByName } from "../utils/cookie";
 
 function Blogs() {
     const [blogs, setBlogs] = useState([]);
-    const [token, setToken] = useState([]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-          try {
-            const cookies = document.cookie.split(';');
-            const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('access_token='));
-            const token = tokenCookie.split('=')[1].trim();
-            setToken(token)
-          } catch (error) {
-            console.error('Error fetching data:', error);
-          }
-        };
-      
-        fetchData();
-      }, []);
-
+    const navigate  = useNavigate();
       useEffect(() => {
-        const fetchBlogData = async () => {
+        const fetchData = async () => {
             try {
                 //console.log(id);
                 const response = await axios.get('http://localhost:4000/blogs', {
                     headers: {
-                    Authorization: `Bearer ${token}`,
+                        Authorization: `Bearer ${getCookieByName('access_token')}`,
                     },
                 });
-
-                setBlogs(response.data.blogs);
-                //console.log(response.data.comments)
+                if(response.data.success){
+                    setBlogs(response.data.blogs);
+                } else{
+                    alert(response.data.message)
+                    navigate('/')
+                }
             } catch (error) {
                 console.error('Error fetching blog data:', error);
+                alert(error.response.data.message)
+                navigate('/')
+            }
+            finally{
+
             }
         };
       
-        if (token) {
-          fetchBlogData();
-        }
-    }, [token]);
+          fetchData();
+    }, []);
 
     return (
         <div className="d-flex flex-row justify-content-center">

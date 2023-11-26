@@ -4,6 +4,7 @@ import { useState , useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { useParams } from 'react-router-dom';
 import moment from 'moment';
+import { getCookieByName } from "../utils/cookie";
 
 function Profile() {
     const [token, setToken] = useState([]);
@@ -15,56 +16,32 @@ function Profile() {
         phone_number: '',
         avatar: null,
     });
-
     useEffect(() => {
         if (formData.avatar === null || formData?.avatar?.url===avatar) {
             const { avatar, ...formDataWithoutAvatar } = formData;
-            //console.log(formDataWithoutImage)
             setFormData(formDataWithoutAvatar);
         }
     }, [formData.avatar]);
-
-    useEffect(() => {
-        const fetch = async () => {
-            try {
-                const cookies = document.cookie.split(';');
-                const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('access_token='));
-                if (tokenCookie) {
-                const token = tokenCookie.split('=')[1].trim();
-                setToken(token);
-                } else {
-                console.error('Access token not found in cookie.');
-                }
-            } catch (error) {
-                console.error('Error fetching token:', error);
-            }
-        };
-      
-        fetch();
-    }, []);
       
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                //console.log(id);
-                const response = await axios.get(`http://localhost:4000/me/account/info`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-                });
-                const { phone_number, user_name } = response.data.user;
-                setFormData({ phone_number, user_name, avatar:null });
-                //console.log(response.data.user)
-                setAvatar(response.data.user.avatar.url)
-            } catch (error) {
-                console.error('Error fetching blog data:', error);
-            }
-        };
-      
-        if (token) {
           fetchData();
+        // }
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const response = await axios.get(`http://localhost:4000/me/account/info`, {
+            headers: {
+                Authorization: `Bearer ${getCookieByName('access_token')}`,
+            },
+            });
+            const { phone_number, user_name } = response.data.user;
+            setFormData({ phone_number, user_name, avatar:null });
+            setAvatar(response.data.user.avatar.url)
+        } catch (error) {
+            console.error('Error fetching blog data:', error);
         }
-    }, [token]);
+    };
 
     const handleSubmit = async () => {
         try {
@@ -73,7 +50,7 @@ function Profile() {
                 formData, 
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        Authorization: `Bearer ${getCookieByName('access_token')}`,
                         'Content-Type': 'multipart/form-data',
                     },
                 }
@@ -81,6 +58,7 @@ function Profile() {
             if(response.data.success){
                 alert(response.data.message)
                 window.location.reload();
+                //fetchData()
                 //navigate(`/me/info`);
             }   
         } 

@@ -4,36 +4,19 @@ import { useState , useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { useParams } from 'react-router-dom';
 import moment from 'moment';
+import { getCookieByName } from "../utils/cookie";
 
 function AdminBlog() {
-    const [token, setToken] = useState([]);
     const [comments, setComments] = useState([]);
-    //const [blog, setBlog] = useState([]);
     const { id } = useParams();
     const [blog, setBlog] = useState([]);
-
-    useEffect(() => {
-        const fetch = async () => {
-            try {
-                const cookies = document.cookie.split(';');
-                const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('access_token='));
-                const token = tokenCookie.split('=')[1].trim();
-                setToken(token);
-            } catch (error) {
-                console.error('Error fetching token:', error);
-            }
-        };
-      
-        fetch();
-    }, []);
       
     useEffect(() => {
         const fetchData = async () => {
-            try {
-                //console.log(id);
+            try { 
                 const response = await axios.get(`http://localhost:4000/blogs/${id}`, {
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${getCookieByName('access_token')}`,
                 },
                 });
                 setBlog(response.data.blog);
@@ -44,10 +27,9 @@ function AdminBlog() {
             }
         };
       
-        if (token) {
-          fetchData();
-        }
-    }, [token]);
+        
+        fetchData();
+    }, []);
 
     return (
         <div className="d-flex flex-column align-items-center">

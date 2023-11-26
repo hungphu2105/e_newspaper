@@ -3,48 +3,29 @@ import React from "react";
 import { useState , useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { Pencil, Trash } from "lucide-react";
-import { useParams } from 'react-router-dom';
 import moment from 'moment';
+import { getCookieByName } from "../utils/cookie";
 
 function MyBlog() {
     const [blogs, setBlogs] = useState([]);
-    const [token, setToken] = useState([]);
-    const { id } = useParams();
-    
-    useEffect(() => {
-        const fetch = async () => {
-          try {
-            const cookies = document.cookie.split(';');
-            const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('access_token='));
-            const token = tokenCookie.split('=')[1].trim();
-            setToken(token);            
-          } catch (error) {
-            console.error('Error fetching data:', error);
-          }
-        };
-      
-        fetch();
-    },[]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get('http://localhost:4000/me/myblogs', {
-                    headers: {
-                    Authorization: `Bearer ${token}`,
-                    },
-                });
-                setBlogs(response.data.blogs);
-                //console.log(response.data.comments)
-            } catch (error) {
-                console.error('Error fetching blog data:', error);
-            }
-        };
-      
-        if (token) {
-          fetchData();
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const response = await axios.get('http://localhost:4000/me/myblogs', {
+                headers: {
+                    Authorization: `Bearer ${getCookieByName('access_token')}`,
+                },
+            });
+            setBlogs(response.data.blogs);
+            //console.log(response.data.comments)
+        } catch (error) {
+            console.error('Error fetching blog data:', error);
         }
-    }, [token]);
+    };
 
     const handleDelete = async (blogId) => {
         try {
@@ -52,20 +33,15 @@ function MyBlog() {
             const response = await axios.delete(`http://localhost:4000/me/myblogs/${blogId}`, 
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        Authorization: `Bearer ${getCookieByName('access_token')}`,
                         'Content-Type': 'multipart/form-data',
                     },
                 }
             );
             if(response.data.success){
-                //console.log(response.data.message)
                 alert(response.data.message)
-                window.location.reload();
-                //navigate(`/me/myblogs`);
-            }  
-            // else{
-            //     console.log(response.data.message)
-            // } 
+                fetchData()
+            }
         } 
         catch (error) {
             alert("Lỗi", error.response.data.message);

@@ -4,54 +4,34 @@ import { useState , useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { useParams } from 'react-router-dom';
 import moment from 'moment';
+import { getCookieByName } from "../utils/cookie";
 
 function Blog() {
-    const [token, setToken] = useState([]);
     const [comments, setComments] = useState([]);
     const [formData, setFormData] = useState({
         comment: '',
     });
     const navigate  = useNavigate();
-    //const [blog, setBlog] = useState([]);
     const { id } = useParams();
     const [blog, setBlog] = useState([]);
-
-    useEffect(() => {
-        const fetch = async () => {
-            try {
-                const cookies = document.cookie.split(';');
-                const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('access_token='));
-                const token = tokenCookie.split('=')[1].trim();
-                setToken(token);
-            } catch (error) {
-                console.error('Error fetching token:', error);
-            }
-        };
-      
-        fetch();
-    }, []);
       
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                //console.log(id);
-                const response = await axios.get(`http://localhost:4000/blogs/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-                });
-                setBlog(response.data.blog);
-                setComments(response.data.comments)
-                //console.log(response.data.comments)
-            } catch (error) {
-                console.error('Error fetching blog data:', error);
-            }
-        };
-      
-        if (token) {
           fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const response = await axios.get(`http://localhost:4000/blogs/${id}`, {
+            headers: {
+                Authorization: `Bearer ${getCookieByName('access_token')}`,
+            },
+            });
+            setBlog(response.data.blog);
+            setComments(response.data.comments)
+        } catch (error) {
+            console.error('Error fetching blog data:', error);
         }
-    }, [token]);
+    };
 
     const handleComment = async () => {
         try {
@@ -59,16 +39,14 @@ function Blog() {
                 formData, 
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        Authorization: `Bearer ${getCookieByName('access_token')}`,
                         'Content-Type': 'multipart/form-data',
                     },
                 }
             );
             if(response.data.success){
-                //const blog_id = response.data.blog._id;
-                //alert("Bình luận thành công")
-                window.location.reload();
-                //navigate(`/blogs/${blog_id}`);
+                setFormData({comment: ''})
+                fetchData()
             }   
         } 
         catch (error) {

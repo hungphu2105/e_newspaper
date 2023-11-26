@@ -1,13 +1,13 @@
 import axios from "axios";
-import { Newspaper , Home, PlusCircle, Search, UserCircle2 } from "lucide-react";
+import { Newspaper , Search, UserCircle2 } from "lucide-react";
 import { useState , useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
+import { deleteAllCookies , getCookieByName } from "../../../utils/cookie";
 
 const AdminSidebar = () => {
     const [user, setUser] = useState();
     const [avatar, setAvatar] = useState();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [token, setToken] = useState([]);
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
@@ -16,59 +16,25 @@ const AdminSidebar = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const cookies = document.cookie.split(';');
-                const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('access_token='));
-                if (tokenCookie) {
-                const token = tokenCookie.split('=')[1].trim();
-                setToken(token);
-                } else {
-                console.error('Access token not found in cookie.');
-                }
-            } catch (error) {
-                console.error('Error fetching token:', error);
-            }
-        };
-      
-        fetchData();
-    }, []);
-
-    useEffect(() => {
-        const fetchBlogData = async () => {
-            try {
-                //console.log(id);
                 const response = await axios.get(`http://localhost:4000/me/account/info`, {
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${getCookieByName('access_token')}`,
                 },
                 });
                 setUser(response.data.user);
-                console.log(response.data.user)
                 setAvatar(response.data.user.avatar.url)
             } catch (error) {
                 console.error('Error fetching blog data:', error);
             }
         };
-      
-        if (token) {
-          fetchBlogData();
-        }
-    },[token]);
-
-    const deleteAllCookies = () => {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i].trim();
-            var cookieName = cookie.split('=')[0];
-            var cookieExpires = new Date(0).toUTCString();
-            document.cookie = cookieName + '=; expires=' + cookieExpires + '; path=/';
-        }
-    }
+        fetchData();
+    },[]);
 
     const handleLogout = async () => {
         try {
+            deleteAllCookies()
             await  axios.post('http://localhost:4000/auth/logout', {}, {withCredentials: true});
             //console.log(response.data)
-            deleteAllCookies()
             navigate('/')
         } catch (error) {
             console.error(error)

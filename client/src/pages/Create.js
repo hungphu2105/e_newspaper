@@ -2,9 +2,9 @@ import axios from "axios";
 import React from "react";
 import { useState , useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
+import { getCookieByName } from "../utils/cookie";
 
 function Create() {
-    const [token, setToken] = useState([]);
     const navigate  = useNavigate();
     const [formData, setFormData] = useState({
         title: '',
@@ -35,19 +35,17 @@ function Create() {
             return;
         }
         try {
-            //console.log(formData)
             const response = await axios.post('http://localhost:4000/blogs/create', 
                 formData, 
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        Authorization: `Bearer ${getCookieByName('access_token')}`,
                         'Content-Type': 'multipart/form-data',
                     },
                 }
             );
             if(response.data.success){
                 const blog_id = response.data.blog._id;
-                //alert("Đăng bài thành công")
                 navigate(`/blogs/${blog_id}`);
             }   
         } 
@@ -56,25 +54,6 @@ function Create() {
             console.error('Lỗi', error);  
         }
     };
-
-    useEffect(() => {
-        const fetch = async () => {
-          try {
-            const cookies = document.cookie.split(';');
-            const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('access_token='));
-            if (tokenCookie) {
-              //const token = tokenCookie.split('=')[1].trim();
-              setToken(tokenCookie.split('=')[1].trim());
-            } else {
-              console.error('Access token not found in cookie.');
-            }
-          } catch (error) {
-            console.error('Error fetching data:', error);
-          }
-        };
-      
-        fetch();
-      }, []);
 
     return (
         <div className="">
