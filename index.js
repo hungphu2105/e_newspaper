@@ -32,10 +32,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(fileUpload());
 
-app.get('/', (req, res) => {
-    res.send('Hello World!')
-  })
-
 route(app);
 
 app.listen(port, () => {
