@@ -19,6 +19,11 @@ const Blog = new Schema({
         required: true,
         default: 0,
     },
+    category_id:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true,
+    },
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

@@ -11,11 +11,41 @@ function Create() {
         summary: '',
         content:'',
         image: null,
+        category_id:'',
     });
+
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axios.get('http://localhost:4000/categories', {
+                    headers: {
+                        Authorization: `Bearer ${getCookieByName('access_token')}`,
+                    },
+                });
+
+                if(response.data.success){
+                    setCategories(response.data.categories);
+                }
+            } catch (error) {
+                console.error('Error fetching categories', error);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        if (name === "category") {
+            const selectedCategory = categories.find(category => category.name === value);
+            const category_id = selectedCategory ? selectedCategory._id : '';
+        
+            setFormData({ ...formData, category: value, category_id });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
 
     const handleImageChange = (e) => {
@@ -35,7 +65,7 @@ function Create() {
             return;
         }
         try {
-            //console.log(formData)
+            console.log(formData)
             const response = await axios.post('http://localhost:4000/blogs/create', 
                 formData, 
                 {
@@ -105,6 +135,24 @@ function Create() {
                         onChange={handleImageChange}
                     />
                 </div>
+                <div className="form-group m-3">
+                    <label htmlFor="category">Chọn danh mục</label>
+                    <select
+                        className="form-control"
+                        id="category"
+                        name="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                    >
+                        <option value="">-- Chọn danh mục --</option>
+                        {categories.map(category => (
+                        <option key={category._id} value={category.name}>
+                            {category.name}
+                        </option>
+                        ))}
+                    </select>
+                </div>
+
                 
                 <button onClick={handleSubmit} className="btn btn-success m-3">Đăng</button>
             </div>

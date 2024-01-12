@@ -5,7 +5,9 @@ const cloudinary = require('cloudinary').v2;
 //GET /blogs
 exports.getAll = (async (req, res) => {
     try {
-        const blogs = await Blog.find().populate('user_id', 'user_name');
+        const blogs = await Blog.find()
+            .populate('user_id', 'user_name')
+            .populate('category_id', 'name');
         //console.log(blogs);
         res.status(201).json({
             success: true,
@@ -26,7 +28,9 @@ exports.getBlog = (async (req, res) => {
             req.params.id,
             { $inc: { views: 1 } }, 
             { new: true }
-        ).populate('user_id', 'user_name');
+        )
+        .populate('user_id', 'user_name')
+        .populate('category_id', 'name');;
         const comments = await Comment.find({ blog_id: req.params.id })
             .populate('user_id', 'user_name')
         //console.log(comments)
@@ -50,20 +54,20 @@ exports.create = (async (req, res) => {
     try {
         const currentDate = new Date();
 
-        console.log(req.body)
+        // console.log(req.body)
 
-        // const result = await cloudinary.uploader.upload(req.body.image);
-        // const image = {
-        //     publicId: result.public_id,
-        //     url: result.secure_url
-        // }
+        const result = await cloudinary.uploader.upload(req.body.image);
+        const image = {
+            publicId: result.public_id,
+            url: result.secure_url
+        }
         
-        // const blog = await Blog.create({ user_id:req.user._id ,...req.body, public_date: currentDate, image});
-        // res.status(201).json({
-        //     success: true,
-        //     message: 'Đăng bài thành công.',
-        //     blog
-        // });
+        const blog = await Blog.create({ user_id:req.user._id ,...req.body, public_date: currentDate, image});
+        res.status(201).json({
+            success: true,
+            message: 'Đăng bài thành công.',
+            blog
+        });
     } catch (error) {
         console.log(error)
         res.status(500).json({

@@ -43,7 +43,12 @@ function Blogs() {
                 {blogs.map(blog => (
                     <div key={blog._id} className="card m-4" style={{ width: '55rem' }}>
                         <div className="card-body">
-                            <div>{blog.user_id.user_name}</div>
+                            {/* <div>{blog.user_id.user_name}</div>
+                            <div>#{blog.category_id?.name}</div> */}
+                            <div className="d-flex justify-content-between">
+                                <div>{blog.user_id.user_name}</div>
+                                <div>#{blog.category_id?.name}</div>
+                            </div>
                             <div className="d-flex flex-row">
                                 <div className="col-sm-9">
                                 <Link to={`/blogs/${blog._id}`} className="text-dark">

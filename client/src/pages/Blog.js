@@ -65,6 +65,7 @@ function Blog() {
             <div className="card mt-4" style={{ width: '55rem' }}>
                 <div className="card-body">
                     <h3 className="card-title">{blog.title}</h3>
+                    <div style={{ color: '#5f4be8' }}>#{blog.category_id?.name}</div>
                     <div style={{ color: '#87CEEB' }}>{blog?.user_id?.user_name}</div>
                     <div className="mb-2">{moment(blog.public_date).format('HH:mm DD-MM-YYYY')}</div>
                     <div >
