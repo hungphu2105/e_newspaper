@@ -50,20 +50,20 @@ exports.create = (async (req, res) => {
     try {
         const currentDate = new Date();
 
-        //console.log(req.body)
+        console.log(req.body)
 
-        const result = await cloudinary.uploader.upload(req.body.image);
-        const image = {
-            publicId: result.public_id,
-            url: result.secure_url
-        }
+        // const result = await cloudinary.uploader.upload(req.body.image);
+        // const image = {
+        //     publicId: result.public_id,
+        //     url: result.secure_url
+        // }
         
-        const blog = await Blog.create({ user_id:req.user._id ,...req.body, public_date: currentDate, image});
-        res.status(201).json({
-            success: true,
-            message: 'Đăng bài thành công.',
-            blog
-        });
+        // const blog = await Blog.create({ user_id:req.user._id ,...req.body, public_date: currentDate, image});
+        // res.status(201).json({
+        //     success: true,
+        //     message: 'Đăng bài thành công.',
+        //     blog
+        // });
     } catch (error) {
         console.log(error)
         res.status(500).json({

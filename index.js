@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const cloudinary = require('cloudinary').v2;
+
 const route = require("./routes");
 const connectDb = require("./config/database");
 

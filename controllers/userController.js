@@ -24,7 +24,8 @@ exports.disabled = (async (req, res) => {
         user_update = await User.updateOne(
             { _id: req.params.id},
             { $set: { is_active: is_active } },
-            { new: true },)
+            { new: true },
+        )
         res.status(200).json({
             success: true,
             user
